@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>50/30/20 Budget Calculator | Free Tool</title>
+    <meta name="description" content="Free 50/30/20 budget calculator. Instantly see how to split your income into needs, wants, and savings.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #1a1a2e; margin: 30px 0 10px; font-size: 28px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 15px; }
+        .card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; }
+        input { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 18px; }
+        input:focus { border-color: #2e7d32; outline: none; }
+        .btn { width: 100%; padding: 14px; background: #2e7d32; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; }
+        .btn:hover { background: #1b5e20; }
+        .results { display: none; }
+        .bucket { border-radius: 12px; padding: 24px; margin-bottom: 16px; color: white; }
+        .bucket-needs { background: linear-gradient(135deg, #e53935, #c62828); }
+        .bucket-wants { background: linear-gradient(135deg, #fb8c00, #ef6c00); }
+        .bucket-savings { background: linear-gradient(135deg, #43a047, #2e7d32); }
+        .bucket-header { display: flex; justify-content: space-between; align-items: center; }
+        .bucket-pct { font-size: 36px; font-weight: 700; }
+        .bucket-amount { font-size: 28px; font-weight: 700; }
+        .bucket-label { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        .bucket-examples { font-size: 13px; opacity: 0.8; margin-top: 10px; line-height: 1.5; }
+        .weekly { text-align: center; margin: 20px 0; color: #666; }
+        .cta { background: #e8f5e9; border-radius: 12px; padding: 20px; text-align: center; }
+        .cta h3 { color: #2e7d32; margin-bottom: 8px; }
+        .cta p { color: #555; font-size: 14px; margin-bottom: 12px; }
+        .cta a { display: inline-block; padding: 10px 24px; background: #2e7d32; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
+        footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 50/30/20 Budget Calculator</h1>
+        <p class="subtitle">The simplest way to budget your money</p>
+        
+        <div class="card">
+            <label>Your Monthly After-Tax Income ($)</label>
+            <input type="number" id="income" placeholder="e.g. 4000">
+            <button class="btn" onclick="calc()">Calculate My Budget</button>
+        </div>
+        
+        <div class="results" id="results">
+            <div class="bucket bucket-needs">
+                <div class="bucket-header">
+                    <div><div class="bucket-pct">50%</div><div class="bucket-label">NEEDS</div></div>
+                    <div class="bucket-amount" id="needs">$0</div>
+                </div>
+                <p class="bucket-examples">Rent/mortgage, utilities, groceries, insurance, minimum debt payments, transportation</p>
+            </div>
+            
+            <div class="bucket bucket-wants">
+                <div class="bucket-header">
+                    <div><div class="bucket-pct">30%</div><div class="bucket-label">WANTS</div></div>
+                    <div class="bucket-amount" id="wants">$0</div>
+                </div>
+                <p class="bucket-examples">Dining out, entertainment, subscriptions, shopping, hobbies, vacations</p>
+            </div>
+            
+            <div class="bucket bucket-savings">
+                <div class="bucket-header">
+                    <div><div class="bucket-pct">20%</div><div class="bucket-label">SAVINGS & DEBT</div></div>
+                    <div class="bucket-amount" id="savings">$0</div>
+                </div>
+                <p class="bucket-examples">Emergency fund, retirement, investments, extra debt payments, financial goals</p>
+            </div>
+            
+            <p class="weekly">That's <strong id="weekly-savings">$0</strong>/week into savings 🎯</p>
+            
+            <div class="cta">
+                <h3>📊 Ready to track every dollar?</h3>
+                <p>Get the complete Personal Finance Tracker with budget planning, expense tracking, savings goals, and debt payoff tools.</p>
+                <a href="https://timmothyscribe.gumroad.com/l/gadnup" target="_blank">Get the Full Tracker ($5) →</a>
+            </div>
+        </div>
+        
+        <footer>Made with 💰 by Timmy's Digital Products | Free forever</footer>
+    </div>
+    <script>
+        function calc() {
+            const income = parseFloat(document.getElementById('income').value) || 0;
+            document.getElementById('needs').textContent = '$' + (income * 0.5).toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('wants').textContent = '$' + (income * 0.3).toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('savings').textContent = '$' + (income * 0.2).toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('weekly-savings').textContent = '$' + (income * 0.2 / 4.33).toFixed(0);
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({behavior: 'smooth'});
+        }
+    </script>
+</body>
+</html>
