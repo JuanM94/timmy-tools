@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>README Generator — Create Beautiful READMEs in Seconds</title>
+<meta name="description" content="Generate professional README.md files for your GitHub projects. Fill in the details, get a polished README instantly.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh}
+.header{background:linear-gradient(135deg,#238636,#1f6feb);padding:40px 20px;text-align:center}
+.header h1{font-size:2.2rem;color:#fff;margin-bottom:8px}
+.header p{color:rgba(255,255,255,0.8);font-size:1.1rem}
+.container{max-width:900px;margin:0 auto;padding:30px 20px}
+.form-group{margin-bottom:20px}
+label{display:block;font-weight:600;margin-bottom:6px;color:#8b949e}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid #30363d;border-radius:6px;background:#161b22;color:#c9d1d9;font-size:14px;font-family:inherit}
+textarea{min-height:80px;resize:vertical}
+input:focus,textarea:focus{outline:none;border-color:#1f6feb}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.row{grid-template-columns:1fr}}
+button{padding:12px 24px;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-primary{background:#238636;color:#fff;width:100%;margin-top:10px}
+.btn-primary:hover{background:#2ea043}
+.btn-copy{background:#1f6feb;color:#fff;margin-top:10px}
+.btn-copy:hover{background:#388bfd}
+.output{margin-top:30px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;display:none}
+.output pre{white-space:pre-wrap;word-wrap:break-word;font-family:'Fira Code',monospace,Consolas;font-size:13px;line-height:1.5;color:#e6edf3}
+.output h3{margin-bottom:12px;color:#58a6ff}
+.actions{display:flex;gap:10px;margin-top:12px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.badge-option{padding:4px 10px;background:#21262d;border:1px solid #30363d;border-radius:20px;font-size:12px;cursor:pointer;user-select:none}
+.badge-option.selected{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.tip{text-align:center;margin-top:40px;padding:20px;border-top:1px solid #21262d;color:#8b949e;font-size:14px}
+.tip a{color:#58a6ff;text-decoration:none}
+.sections-toggle{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.section-check{display:flex;align-items:center;gap:4px;font-size:13px;color:#8b949e}
+.section-check input{width:auto}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>📝 README Generator</h1>
+<p>Create professional README.md files for your projects in seconds</p>
+</div>
+
+<div class="container">
+<div class="form-group">
+<label>Project Name *</label>
+<input type="text" id="name" placeholder="my-awesome-project">
+</div>
+
+<div class="form-group">
+<label>Short Description *</label>
+<input type="text" id="description" placeholder="A tool that does something amazing">
+</div>
+
+<div class="row">
+<div class="form-group">
+<label>License</label>
+<select id="license"><option>MIT</option><option>Apache-2.0</option><option>GPL-3.0</option><option>BSD-3-Clause</option><option>ISC</option><option>None</option></select>
+</div>
+<div class="form-group">
+<label>Language / Framework</label>
+<input type="text" id="lang" placeholder="Python, React, Node.js...">
+</div>
+</div>
+
+<div class="form-group">
+<label>Key Features (one per line)</label>
+<textarea id="features" placeholder="Fast and lightweight&#10;Easy to configure&#10;Supports multiple formats"></textarea>
+</div>
+
+<div class="form-group">
+<label>Installation Command</label>
+<input type="text" id="install" placeholder="npm install my-awesome-project">
+</div>
+
+<div class="form-group">
+<label>Usage Example (code)</label>
+<textarea id="usage" placeholder="import mylib&#10;&#10;result = mylib.do_something()&#10;print(result)"></textarea>
+</div>
+
+<div class="row">
+<div class="form-group">
+<label>Author / GitHub Username</label>
+<input type="text" id="author" placeholder="yourusername">
+</div>
+<div class="form-group">
+<label>Repository URL</label>
+<input type="text" id="repo" placeholder="https://github.com/user/repo">
+</div>
+</div>
+
+<div class="form-group">
+<label>Include Sections</label>
+<div class="sections-toggle">
+<label class="section-check"><input type="checkbox" id="sec-badges" checked> Badges</label>
+<label class="section-check"><input type="checkbox" id="sec-toc" checked> Table of Contents</label>
+<label class="section-check"><input type="checkbox" id="sec-features" checked> Features</label>
+<label class="section-check"><input type="checkbox" id="sec-install" checked> Installation</label>
+<label class="section-check"><input type="checkbox" id="sec-usage" checked> Usage</label>
+<label class="section-check"><input type="checkbox" id="sec-contributing"> Contributing</label>
+<label class="section-check"><input type="checkbox" id="sec-license" checked> License</label>
+<label class="section-check"><input type="checkbox" id="sec-api"> API Reference</label>
+</div>
+</div>
+
+<button class="btn-primary" onclick="generate()">⚡ Generate README</button>
+
+<div class="output" id="output">
+<h3>Your README.md</h3>
+<pre id="readme-content"></pre>
+<div class="actions">
+<button class="btn-copy" onclick="copyReadme()">📋 Copy to Clipboard</button>
+<button class="btn-copy" onclick="downloadReadme()" style="background:#238636">💾 Download .md</button>
+</div>
+</div>
+
+<div class="tip">
+  Built by <a href="https://dev.to/timmothybuilder">Timmy</a> ·
+  <a href="https://juanm94.github.io/timmy-tools/">More free tools</a> ·
+  Found it useful? <a href="https://drive.google.com/file/d/1sdJB1blFwRWl_5Rrw4pQyABEvmDFQrT1/view">Check out my AI Prompt Bible</a>
+</div>
+</div>
+
+<script>
+function generate(){
+  const name=document.getElementById('name').value||'my-project';
+  const desc=document.getElementById('description').value||'A great project';
+  const license=document.getElementById('license').value;
+  const lang=document.getElementById('lang').value;
+  const features=document.getElementById('features').value;
+  const install=document.getElementById('install').value;
+  const usage=document.getElementById('usage').value;
+  const author=document.getElementById('author').value;
+  const repo=document.getElementById('repo').value;
+  
+  const sec={
+    badges:document.getElementById('sec-badges').checked,
+    toc:document.getElementById('sec-toc').checked,
+    features:document.getElementById('sec-features').checked,
+    install:document.getElementById('sec-install').checked,
+    usage:document.getElementById('sec-usage').checked,
+    contributing:document.getElementById('sec-contributing').checked,
+    license:document.getElementById('sec-license').checked,
+    api:document.getElementById('sec-api').checked
+  };
+  
+  let md='';
+  
+  // Badges
+  if(sec.badges&&repo){
+    const r=repo.replace('https://github.com/','');
+    md+=`![License](https://img.shields.io/badge/license-${license}-blue.svg) `;
+    if(lang)md+=`![Language](https://img.shields.io/badge/built%20with-${encodeURIComponent(lang)}-brightgreen) `;
+    md+=`![GitHub stars](https://img.shields.io/github/stars/${r}?style=social)\n\n`;
+  }
+  
+  md+=`# ${name}\n\n`;
+  md+=`> ${desc}\n\n`;
+  
+  // TOC
+  if(sec.toc){
+    md+=`## Table of Contents\n\n`;
+    if(sec.features)md+=`- [Features](#features)\n`;
+    if(sec.install)md+=`- [Installation](#installation)\n`;
+    if(sec.usage)md+=`- [Usage](#usage)\n`;
+    if(sec.api)md+=`- [API Reference](#api-reference)\n`;
+    if(sec.contributing)md+=`- [Contributing](#contributing)\n`;
+    if(sec.license)md+=`- [License](#license)\n`;
+    md+=`\n`;
+  }
+  
+  // Features
+  if(sec.features&&features){
+    md+=`## Features\n\n`;
+    features.split('\n').filter(f=>f.trim()).forEach(f=>{
+      md+=`- ✨ ${f.trim()}\n`;
+    });
+    md+=`\n`;
+  }
+  
+  // Installation
+  if(sec.install){
+    md+=`## Installation\n\n`;
+    if(install){
+      md+=`\`\`\`bash\n${install}\n\`\`\`\n\n`;
+    }else{
+      md+=`\`\`\`bash\ngit clone ${repo||'https://github.com/user/'+name}\ncd ${name}\n\`\`\`\n\n`;
+    }
+  }
+  
+  // Usage
+  if(sec.usage&&usage){
+    const ext=lang.toLowerCase().includes('python')?'python':lang.toLowerCase().includes('java')?'javascript':lang.toLowerCase().includes('type')?'typescript':'bash';
+    md+=`## Usage\n\n\`\`\`${ext}\n${usage}\n\`\`\`\n\n`;
+  }
+  
+  // API Reference
+  if(sec.api){
+    md+=`## API Reference\n\n| Method | Endpoint | Description |\n|--------|----------|-------------|\n| GET | \`/api/v1/resource\` | Get all resources |\n| POST | \`/api/v1/resource\` | Create a resource |\n\n`;
+  }
+  
+  // Contributing
+  if(sec.contributing){
+    md+=`## Contributing\n\nContributions are welcome! Please feel free to submit a Pull Request.\n\n1. Fork the project\n2. Create your feature branch (\`git checkout -b feature/amazing-feature\`)\n3. Commit your changes (\`git commit -m 'Add amazing feature'\`)\n4. Push to the branch (\`git push origin feature/amazing-feature\`)\n5. Open a Pull Request\n\n`;
+  }
+  
+  // License
+  if(sec.license){
+    md+=`## License\n\nThis project is licensed under the ${license} License${author?' - see the [LICENSE](LICENSE) file for details':''}.\n\n`;
+  }
+  
+  // Footer
+  if(author){
+    md+=`---\n\nMade with ❤️ by [${author}](https://github.com/${author})`;
+  }
+  
+  document.getElementById('readme-content').textContent=md;
+  document.getElementById('output').style.display='block';
+  document.getElementById('output').scrollIntoView({behavior:'smooth'});
+  window._readmeContent=md;
+}
+
+function copyReadme(){
+  navigator.clipboard.writeText(window._readmeContent).then(()=>{
+    const btn=event.target;btn.textContent='✅ Copied!';setTimeout(()=>btn.textContent='📋 Copy to Clipboard',2000);
+  });
+}
+
+function downloadReadme(){
+  const blob=new Blob([window._readmeContent],{type:'text/markdown'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='README.md';a.click();
+}
+</script>
+</body>
+</html>
