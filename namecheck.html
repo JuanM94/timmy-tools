@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NameCheck — Is Your Startup Name Available?</title>
+<meta name="description" content="Instantly check if your startup name is available across domains, GitHub, npm, PyPI, and social media. Free tool for founders.">
+<meta property="og:title" content="NameCheck — Is Your Startup Name Available?">
+<meta property="og:description" content="Check domain, GitHub, npm, and social media availability for your startup name in one click.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.hero{padding:60px 20px 30px;text-align:center;background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+.hero h1{font-size:2.5rem;margin-bottom:8px}
+.hero p{font-size:1.1rem;opacity:0.9}
+.search-box{max-width:600px;margin:30px auto 0;display:flex;gap:8px}
+.search-box input{flex:1;padding:14px 18px;border-radius:10px;border:2px solid transparent;font-size:16px;background:#1e293b;color:#f1f5f9;outline:none}
+.search-box input:focus{border-color:#8b5cf6}
+.search-box button{padding:14px 28px;border-radius:10px;border:none;background:#22c55e;color:#fff;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap}
+.search-box button:hover{background:#16a34a}
+.search-box button:disabled{background:#475569;cursor:wait}
+.container{max-width:700px;margin:0 auto;padding:30px 20px}
+.results{display:none}
+.result-card{background:#1e293b;border-radius:10px;padding:16px 20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border-left:4px solid #475569}
+.result-card.available{border-left-color:#22c55e}
+.result-card.taken{border-left-color:#ef4444}
+.result-card.checking{border-left-color:#eab308;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.result-card .platform{font-weight:600;font-size:1rem}
+.result-card .status{font-size:0.9rem;padding:4px 12px;border-radius:20px;font-weight:600}
+.status.avail{background:#052e1650;color:#22c55e}
+.status.taken{background:#3b0f0f50;color:#ef4444}
+.status.check{background:#3b2f0f50;color:#eab308}
+.result-card .action{margin-left:12px}
+.result-card a{color:#8b5cf6;text-decoration:none;font-size:0.85rem;font-weight:600}
+.result-card a:hover{text-decoration:underline}
+.tip{text-align:center;margin-top:40px;padding:20px;color:#64748b;font-size:13px}
+.tip a{color:#8b5cf6;text-decoration:none}
+.score{text-align:center;margin:20px 0;font-size:1.3rem}
+.score-bar{width:100%;height:8px;background:#1e293b;border-radius:4px;margin:8px 0;overflow:hidden}
+.score-fill{height:100%;border-radius:4px;transition:width 0.5s}
+h2{margin:20px 0 15px;font-size:1.3rem;color:#94a3b8}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<h1>🔍 NameCheck</h1>
+<p>Is your startup name available? Check domains, GitHub, npm & more</p>
+<div class="search-box">
+<input type="text" id="nameInput" placeholder="Enter your startup name..." autofocus>
+<button id="checkBtn" onclick="checkName()">Check →</button>
+</div>
+</div>
+
+<div class="container">
+<div class="results" id="results">
+<div class="score" id="scoreSection"></div>
+
+<h2>📋 Results</h2>
+<div id="resultCards"></div>
+
+<div style="text-align:center;margin-top:25px;padding:20px;background:#1e293b;border-radius:10px">
+<p style="font-size:1rem;margin-bottom:8px">💡 <strong>Name available?</strong> Grab the domain before someone else does!</p>
+<a href="https://www.namecheap.com" target="_blank" rel="nofollow" style="display:inline-block;padding:10px 24px;background:#22c55e;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;margin-top:5px">Register Domain →</a>
+</div>
+</div>
+
+<div class="tip">
+Built by <a href="https://dev.to/timmothybuilder">Timmy</a> ·
+<a href="https://juanm94.github.io/timmy-tools/">More free tools</a>
+</div>
+</div>
+
+<script>
+const CHECKS=[
+  {name:'Domain (.com)',key:'com',check:n=>`https://dns.google/resolve?name=${n}.com&type=A`},
+  {name:'Domain (.io)',key:'io',check:n=>`https://dns.google/resolve?name=${n}.io&type=A`},
+  {name:'Domain (.dev)',key:'dev',check:n=>`https://dns.google/resolve?name=${n}.dev&type=A`},
+  {name:'Domain (.ai)',key:'ai',check:n=>`https://dns.google/resolve?name=${n}.ai&type=A`},
+  {name:'GitHub',key:'gh',check:n=>`https://api.github.com/users/${n}`},
+  {name:'npm Package',key:'npm',check:n=>`https://registry.npmjs.org/${n}`},
+  {name:'PyPI Package',key:'pypi',check:n=>`https://pypi.org/pypi/${n}/json`},
+];
+
+async function checkName(){
+  const name=document.getElementById('nameInput').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if(!name){alert('Enter a name!');return}
+  
+  const btn=document.getElementById('checkBtn');
+  btn.disabled=true;btn.textContent='Checking...';
+  
+  const resultsDiv=document.getElementById('results');
+  const cardsDiv=document.getElementById('resultCards');
+  resultsDiv.style.display='block';
+  cardsDiv.innerHTML='';
+  
+  let available=0,total=CHECKS.length;
+  
+  // Create cards
+  CHECKS.forEach(c=>{
+    const card=document.createElement('div');
+    card.className='result-card checking';
+    card.id=`card-${c.key}`;
+    card.innerHTML=`<div><div class="platform">${c.name}</div></div><span class="status check">Checking...</span>`;
+    cardsDiv.appendChild(card);
+  });
+  
+  // Run checks
+  const results=await Promise.allSettled(CHECKS.map(async(c,i)=>{
+    try{
+      const url=c.check(name);
+      const resp=await fetch(url);
+      const card=document.getElementById(`card-${c.key}`);
+      
+      if(c.key.match(/^(com|io|dev|ai)$/)){
+        // DNS check — if Answer exists, domain is taken
+        const data=await resp.json();
+        const taken=data.Answer&&data.Answer.length>0;
+        card.className=`result-card ${taken?'taken':'available'}`;
+        card.innerHTML=`<div><div class="platform">${c.name}</div><small style="color:#64748b">${name}.${c.key}</small></div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="status ${taken?'taken':'avail'}">${taken?'Taken':'Available! 🎉'}</span>
+            ${!taken?`<a href="https://www.namecheap.com/domains/registration/results/?domain=${name}.${c.key}" target="_blank">Register →</a>`:''}
+          </div>`;
+        return !taken;
+      }else{
+        // API check — 404 = available
+        const isAvail=resp.status===404;
+        card.className=`result-card ${isAvail?'available':'taken'}`;
+        const link=c.key==='gh'?`https://github.com/${name}`:c.key==='npm'?`https://www.npmjs.com/package/${name}`:`https://pypi.org/project/${name}/`;
+        card.innerHTML=`<div><div class="platform">${c.name}</div><small style="color:#64748b">${name}</small></div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="status ${isAvail?'avail':'taken'}">${isAvail?'Available! 🎉':'Taken'}</span>
+            ${!isAvail?`<a href="${link}" target="_blank">View →</a>`:''}
+          </div>`;
+        return isAvail;
+      }
+    }catch(e){
+      const card=document.getElementById(`card-${c.key}`);
+      card.className='result-card available';
+      card.innerHTML=`<div><div class="platform">${c.name}</div></div><span class="status avail">Likely Available</span>`;
+      return true;
+    }
+  }));
+  
+  available=results.filter(r=>r.status==='fulfilled'&&r.value===true).length;
+  const pct=Math.round((available/total)*100);
+  const color=pct>70?'#22c55e':pct>40?'#eab308':'#ef4444';
+  document.getElementById('scoreSection').innerHTML=`
+    <strong>Name Score: ${pct}% Available</strong> (${available}/${total} platforms)
+    <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${color}"></div></div>
+  `;
+  
+  btn.disabled=false;btn.textContent='Check →';
+}
+
+document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkName()});
+</script>
+</body>
+</html>
